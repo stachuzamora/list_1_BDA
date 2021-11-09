@@ -2,22 +2,22 @@ import scala.collection.immutable.ListMap
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
-class BookHandler(val bookList: ListBuffer[String]) {
+class DocumentHandler(val documentList: List[(String, String)]) {
 
   val STOP_WORDS_FILENAME = "/home/stanislaw/PWR/Big_Data_Anal/2 semester/BDA_lab/list_1/src/main/scala/resources/stop_words.txt"
-  //  val books: ListBuffer[Book] = loadWords()
+  //  val documents: ListBuffer[document] = loadWords()
 
-  def loadBooks = {
+  def loadDocuments = {
     loadWords().toList
   }
 
-  private def loadWords(): ListBuffer[Book] = {
-    val books = ListBuffer[Book]()
-    bookList.foreach(bookName => {
+  private def loadWords(): ListBuffer[Document] = {
+    val documents = ListBuffer[Document]()
+    documentList.foreach(documentInfo => {
       var wordsList = ListBuffer[String]()
-      val source = Source.fromFile(bookName)
-      val bookLines = try source.getLines.toList finally source.close
-      for (line <- bookLines) {
+      val source = Source.fromFile(documentInfo._2)
+      val documentLines = try source.getLines.toList finally source.close
+      for (line <- documentLines) {
         val split = line.split(' ').toList
         for (words <- split) {
           val cleaned = removeRegex(words)
@@ -26,14 +26,16 @@ class BookHandler(val bookList: ListBuffer[String]) {
       }
       wordsList = removeStopWords(wordsList)
       val wordsCount = countWords(wordsList)
-      books += new Book(wordsList.toList, wordsCount, bookName)
+//      val numberOfWords = wordsCount.foldLeft(0)(_+_._2)
+      documents += new Document(wordsList.toList, wordsCount, documentInfo._1)
     }
     )
-    books
+    documents
   }
 
   private def removeRegex(words: String): String = {
-    words.replaceAll("[^A-Za-z0-9']", "")
+//    words.replaceAll("[^A-Za-z0-9']", "")
+    words.replaceAll("""[\p{Punct}&&[^.]]""", "")
   }
 
   private def removeStopWords(wordsList: ListBuffer[String]): ListBuffer[String] ={
